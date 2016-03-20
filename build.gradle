@@ -1,5 +1,23 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
 group 'org.kaakaa'
 version '1.0-SNAPSHOT'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+mainClassName = 'org.kaakaa.spark.Main'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.sparkjava:spark-core:2.3'
+}
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.12'
