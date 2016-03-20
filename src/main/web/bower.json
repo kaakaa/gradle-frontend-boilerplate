@@ -1,0 +1,34 @@
+{
+  "name": "gradle-frontend-boilerplate",
+  "description": "gradle-frontend-boilerplate",
+  "main": "index.js",
+  "authors": [
+    "kaakaa"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "gradle",
+    "bower",
+    "grunt"
+  ],
+  "homepage": "https://github.com/kaakaa/gradle-frontend-boilerplate",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.6"
+  },
+  "overrides": {
+    "bootstrap": {
+      "main": [
+        "dist/css/bootstrap.css",
+        "dist/js/bootstrap.js"
+      ]
+    }
+  }
+}

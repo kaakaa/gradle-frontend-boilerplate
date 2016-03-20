@@ -1,0 +1,30 @@
+{
+  "name": "gradle-frontend-boilerplate",
+  "version": "1.0.0",
+  "description": "gradle-frontend-boilerplate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaakaa/gradle-frontend-boilerplate.git"
+  },
+  "keywords": [
+    "gradle",
+    "bower",
+    "grunt"
+  ],
+  "author": "kaakaa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kaakaa/gradle-frontend-boilerplate/issues"
+  },
+  "homepage": "https://github.com/kaakaa/gradle-frontend-boilerplate#readme",
+  "devDependencies": {
+    "bower": "^1.7.7",
+    "grunt": "^0.4.5",
+    "grunt-bower-install-simple": "^1.2.1",
+    "grunt-wiredep": "^2.0.0"
+  }
+}

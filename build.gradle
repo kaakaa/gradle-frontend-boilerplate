@@ -1,15 +1,27 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.moowork.grunt' version '0.11'
+    id 'com.moowork.node' version '0.11'
 }
 
 group 'org.kaakaa'
 version '1.0-SNAPSHOT'
 
+/** For Java build */
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 mainClassName = 'org.kaakaa.spark.Main'
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/resources'
+            srcDir 'src/main/web/bower_components'
+        }
+    }
+}
 
 repositories {
     mavenCentral()
@@ -20,6 +32,25 @@ dependencies {
     compile 'com.sparkjava:spark-template-jade:2.3'
 }
 
+
+/** For frontend build */
+node {
+    version = '4.4.0'
+    download = true
+    workDir = file("${projectDir}/src/main/web")
+    nodeModulesDir = file("${projectDir}/src/main/web")
+}
+
+grunt {
+    workDir = file("${projectDir}/src/main/web")
+}
+
+grunt_build.dependsOn 'installGrunt'
+grunt_build.dependsOn 'npmInstall'
+processResources.dependsOn grunt_build
+
+
+/** Other settings */
 task wrapper(type: Wrapper) {
     gradleVersion = '2.12'
 }
