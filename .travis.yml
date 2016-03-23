@@ -1,0 +1,13 @@
+language: java
+jdk:
+- oraclejdk8
+deploy:
+  provider: releases
+  api_key:
+    secure: U57fz6+nKYBEyNHD+u1KU90CaEmMchBcbYUF3NF5xEjdD2JYqvD8F6UeEaxZRIPC28DJuGamVAOt12wHS9J2QW4F725S/ZFoceSq6B8Lnp+uPhpvXduAd/FvNG/xyg04H4jWA87fyRq8IH4SUfGPB0eygCmwpzQ1jWXsbfDT6Jcfi2HFHIva+YoXnzfC7jtF2aMYKN1k6OjiHtLhya02HBlzk/f+J7h576BQtp+qX9+rlG62ZK1bQ61v1Eb/thBahPpSLsS8n4I13WGDDZKdCHgFnH6feWyd0hOKvV23p5mCBu3I8BMryQzLvWQAL+6LbsNxRA9FlthH+yV4ZF88GnviRMex1S6hL2SQUuozXZisyYQcHASsdfw2jNQUfkYU3iU96HOy7Eqg9AshYx7hMq50wWyBfGNGedGIvAVwnXhwH6p0Uu7jDA8DehKih467iMcd+VGAjzEAfvLiVsiMmWhFSOjQ/OIo0X971gyztbyCHU6gJXv57oX4xNaX/mCDPQmCELj/E79jYqRIGrTxpCibYnLNXWTY9cliYD0bzDv9Bsmrf1QRtTRrfylQYyzQOoBBxusZ8EYjZpPOEapGkLBmaGEgpnojVjDiEkQH0AkNwdGzDeScxazEAmaVWy6dNKVb1J8thoFHmzAYhNGEclNMWpeKKXenDxScDb6/oaw=
+  file:
+    - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.tar"
+    - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.zip"
+  on:
+    repo: kaakaa/gradle-frontend-boilerplate
+    tags: true
