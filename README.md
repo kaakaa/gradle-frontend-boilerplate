@@ -1,69 +1,97 @@
 # gradle-frontend-boilerplate
 
-## A. (Travis CI)Githubリリースページへのデプロイ
+## B. GradleでDockerイメージを作成する
 
 ### 概要
 
-GithubへのPushを契機に[Travis CI](https://travis-ci.org/)でビルドを実行し、実行バイナリのzip/tarファイルをGithubページへリリースする。
-
+[bmuschko/gradle-docker-plugin](https://github.com/bmuschko/gradle-docker-plugin)を使って、Gradleから`docker build`を実行するタスクを定義する。  
 
 ### 準備
 
 下記を実施しておく。
 
-* TravisCIのアカウントを作成する
-  * Githubのアカウントでサインインできます
-* [Profile](https://travis-ci.org/profile/)ページから、ビルドを実行するリポジトリを選択しておく
-* [travis-ci/travis.rb](https://github.com/travis-ci/travis.rb#readme)をインストールする(要Ruby環境)
+* dockerをインストールする
+* `unix:///var/run/docker.sock`でDocker Remote APIにアクセスできるようにする
+  * [Remote API](https://docs.docker.com/engine/reference/api/docker_remote_api/)
 
+### 実行
+
+```
+git clone https://github.com/kaakaa/gradle-frontend-boilerplate.git
+cd gradle-frontend-boilerplate
+git checkout sec_B
+
+./gradlew buildDockerImage
+```
 
 ### ビルドスクリプト
 
-プロジェクトのルートで下記`travis`コマンドを実行し、`.travis.yml`というTravis CIのビルド設定ファイルを作成する。  
+長くなってきたので掻い摘んで。  
 
-* `travis init`
-* `travis setup releases`
+build.gradle
+```gradle
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.moowork.grunt' version '0.11'
+    id 'com.moowork.node' version '0.11'
+    id 'com.bmuschko.docker-remote-api' version '2.6.6'  // (1) - GradleからDockerを操作するプラグインを追加する
+}
 
-対話的にプロジェクトの情報を入力していくだけで、`.travis.yml`がほぼできあがります。  
-(自分で`.travis.yml`を書いても問題無いです)
+...
 
 
-.travis.yml
+/** For docker build */
+docker {
+    url = 'unix:///var/run/docker.sock'  // (2) - Docker Remote APIのアドレスを指定する
+}
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+task buildDockerImage(type: DockerBuildImage) {  // (3) - docker buildを実行するタスクを定義する
+    dependsOn clean, installDist  // (4) - docker buildに必要なファイルを生成するタスクへの依存を宣言する
+    inputDir = rootDir
+    tag = 'kaakaa/gradle-frontend-boilerplate'
+}
+
+/** Other settings */
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
 ```
-language: java  // (1) - Javaビルドの設定
-jdk:
-- oraclejdk8
-script: "./gradlew build"  // (2) - ビルドコマンド
-deploy:  // (3) - デプロイ設定
-  provider: releases
-  api_key:
-    secure: ${GITHUB_TOKEN}
-  file:  // (4) - GithubのReleaseページにPushするファイル
-    - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.tar"
-    - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.zip"
-  on:
-    repo: kaakaa/gradle-frontend-boilerplate
-    tags: true  // (5) - tag付きのコミットのみデプロイが行われるようにする
+
+#### (1) GradleからDockerを操作するプラグインを追加する
+
+今回は[bmuschko/gradle-docker-plugin: Gradle plugin for managing Docker images and containers.](https://github.com/bmuschko/gradle-docker-plugin)を使う。  
+
+GradleでDocker操作するプラグインは、同じぐらいのスター数でいくつもあるのでデファクトが無い感じ…
+
+* [Transmode/gradle-docker: A Gradle plugin to build Docker images from the build script.](https://github.com/Transmode/gradle-docker)
+* [gesellix/gradle-docker-plugin: Gradle Docker plugin](https://github.com/gesellix/gradle-docker-plugin)
+
+#### (2) Docker Remote APIのアドレスを指定する
+
+予め起動していたDocker Remote APIのアドレスを指定する
+
+#### (3) docker buildを実行するタスクを定義する
+
+`bmuschko/gradle-docker-plugin`のお作法通り、`docker build`を実行するタスクを定義する。  
+tag名はお好みで。
+
+#### (4) docker buildに必要なファイルを生成するタスクへの依存を宣言する
+
+`installDist`タスクの成果物をDockerイメージに含めるため、`buildDockerImage`タスクが`installDist`タスクのあとに実行されるよう設定している。
+
+* * *
+
+Dockerfile
+```docker
+FROM java
+
+ADD build/install/gradle-frontend-boilerplate /usr/local/src
+
+ENTRYPOINT ["sh", "-c", "/usr/local/src/bin/gradle-frontend-boilerplate"]
 ```
 
-#### (1) Javaビルドの設定
+`installDist`の成果物をDockerイメージの`/usr/local/src`に追加し、起動スクリプトを実行するだけのDockerfileです。
 
-`travis init`コマンドでJavaプロジェクトを選択すると、このように生成される。  
-デフォルトではJavaのバーージョンにJDK6,7が指定されているので`oraclejdk8`にしておく。  
-
-#### (2) ビルドコマンド
-
-Travisで実行するビルドタスク指定する。
-
-#### (3) デプロイ設定
-
-`travis setup releases`コマンドで作成される。  
-
-#### (4) GithubのReleaseページにPushするファイル
-
-ここで指定したファイルが、Githubのリリースページにダウンロードできる形で公開される。  
-今回は、`gradle assembleDist`の成果物であるzip/tarファイルがリリースされるようにした。  
-
-#### (5) tag付きのコミットのみデプロイが行われるようにする
-
-Pushするたびにリリースされるのも辛いので、タグ付きコミットのみデプロイが行われるようにする

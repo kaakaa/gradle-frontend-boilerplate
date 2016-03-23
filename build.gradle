@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'com.moowork.grunt' version '0.11'
     id 'com.moowork.node' version '0.11'
+    id 'com.bmuschko.docker-remote-api' version '2.6.6'
 }
 
 group 'org.kaakaa'
@@ -32,7 +33,6 @@ dependencies {
     compile 'com.sparkjava:spark-template-jade:2.3'
 }
 
-
 /** For frontend build */
 node {
     version = '4.4.0'
@@ -45,10 +45,23 @@ grunt {
     workDir = file("${projectDir}/src/main/web")
 }
 
-grunt_build.dependsOn 'installGrunt'
 grunt_build.dependsOn 'npmInstall'
+grunt_build.dependsOn 'installGrunt'
+installGrunt {}.mustRunAfter 'npmInstall'
 processResources.dependsOn grunt_build
 
+/** For docker build */
+docker {
+    url = 'unix:///var/run/docker.sock'
+}
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+task buildDockerImage(type: DockerBuildImage) {
+    dependsOn clean, installDist
+    inputDir = rootDir
+    tag = 'kaakaa/gradle-frontend-boilerplate'
+}
 
 /** Other settings */
 task wrapper(type: Wrapper) {
