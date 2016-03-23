@@ -1,97 +1,89 @@
 # gradle-frontend-boilerplate
 
-## B. GradleでDockerイメージを作成する
+## C. GradleでDockerイメージを作成する
 
 ### 概要
 
-[bmuschko/gradle-docker-plugin](https://github.com/bmuschko/gradle-docker-plugin)を使って、Gradleから`docker build`を実行するタスクを定義する。  
-
-### 準備
-
-下記を実施しておく。
-
-* dockerをインストールする
-* `unix:///var/run/docker.sock`でDocker Remote APIにアクセスできるようにする
-  * [Remote API](https://docs.docker.com/engine/reference/api/docker_remote_api/)
-
-### 実行
-
-```
-git clone https://github.com/kaakaa/gradle-frontend-boilerplate.git
-cd gradle-frontend-boilerplate
-git checkout sec_B
-
-./gradlew buildDockerImage
-```
-
-### ビルドスクリプト
-
-長くなってきたので掻い摘んで。  
-
-build.gradle
-```gradle
-plugins {
-    id 'java'
-    id 'application'
-    id 'com.moowork.grunt' version '0.11'
-    id 'com.moowork.node' version '0.11'
-    id 'com.bmuschko.docker-remote-api' version '2.6.6'  // (1) - GradleからDockerを操作するプラグインを追加する
-}
-
-...
-
-
-/** For docker build */
-docker {
-    url = 'unix:///var/run/docker.sock'  // (2) - Docker Remote APIのアドレスを指定する
-}
-
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-
-task buildDockerImage(type: DockerBuildImage) {  // (3) - docker buildを実行するタスクを定義する
-    dependsOn clean, installDist  // (4) - docker buildに必要なファイルを生成するタスクへの依存を宣言する
-    inputDir = rootDir
-    tag = 'kaakaa/gradle-frontend-boilerplate'
-}
-
-/** Other settings */
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.12'
-}
-```
-
-#### (1) GradleからDockerを操作するプラグインを追加する
-
-今回は[bmuschko/gradle-docker-plugin: Gradle plugin for managing Docker images and containers.](https://github.com/bmuschko/gradle-docker-plugin)を使う。  
-
-GradleでDocker操作するプラグインは、同じぐらいのスター数でいくつもあるのでデファクトが無い感じ…
-
-* [Transmode/gradle-docker: A Gradle plugin to build Docker images from the build script.](https://github.com/Transmode/gradle-docker)
-* [gesellix/gradle-docker-plugin: Gradle Docker plugin](https://github.com/gesellix/gradle-docker-plugin)
-
-#### (2) Docker Remote APIのアドレスを指定する
-
-予め起動していたDocker Remote APIのアドレスを指定する
-
-#### (3) docker buildを実行するタスクを定義する
-
-`bmuschko/gradle-docker-plugin`のお作法通り、`docker build`を実行するタスクを定義する。  
-tag名はお好みで。
-
-#### (4) docker buildに必要なファイルを生成するタスクへの依存を宣言する
-
-`installDist`タスクの成果物をDockerイメージに含めるため、`buildDockerImage`タスクが`installDist`タスクのあとに実行されるよう設定している。
+GithubへのPushを契機にTravisCIでDockerビルドを行い、DockerイメージをDockerHubへPushする
 
 * * *
 
-Dockerfile
-```docker
-FROM java
+TravisCI上ではDocker Remote APIが起動していなさそうなので、先ほど作った`buildDockerImage`タスクは使用せず、普通の`docker build`コマンドでDockerイメージを作成する。
 
-ADD build/install/gradle-frontend-boilerplate /usr/local/src
 
-ENTRYPOINT ["sh", "-c", "/usr/local/src/bin/gradle-frontend-boilerplate"]
+### ビルドスクリプト
+
+.travis.yml
+```gradle
+sudo: required  // (1) - Dockerを使うことを宣言
+services:
+- docker
+language: java
+jdk:
+- oraclejdk8
+env:  // (2) - Dockerビルド、DockerHubへのPushに使う情報を宣言する
+  global:
+  - REPO=kaakaa/gradle-frontend-boilerplate
+  - COMMIT=${TRAVIS_COMMIT::8}
+  - TAG=${COMMIT}
+  - secure: <encrypted env>
+  - secure: <encrypted env>
+  - secure: <encrypted env>
+
+script: "./gradlew build"
+deploy:
+  provider: releases
+  api_key:
+    secure: <encrypted repo>
+  file:
+  - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.tar"
+  - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.zip"
+  on:
+    repo: kaakaa/gradle-frontend-boilerplate
+    tags: true
+
+after_deploy:  // (3) - Dockerビルド、DockerHubへのPushをする
+- docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+- docker build -f Dockerfile -t $REPO:$COMMIT .
+- docker tag $REPO:$COMMIT $REPO:$TAG
+- docker push $REPO:$COMMIT
 ```
 
-`installDist`の成果物をDockerイメージの`/usr/local/src`に追加し、起動スクリプトを実行するだけのDockerfileです。
+#### (1) Dockerを使うことを宣言
 
+Travisビルドで`docker`コマンドを使用するには、この３行が必要。  
+[Using Docker in Builds - Travis CI](https://docs.travis-ci.com/user/docker/)
+
+#### (2) Dockerビルド、DockerHubへのPushに使う情報を宣言する
+
+Dockerイメージ名やDockerHubへPushする際の名前の情報などを宣言している。  
+`${TRAVIS_COMMIT}`はTravisでのビルドが走る際のgitのコミットIDを示しており、`${TRAVIS_COMMIT::8}`で、その先頭８文字を取得できる。  
+[Environment Variables - Travis CI](https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables)
+
+`secure`文字列はDockerHubへのログイン情報をencryptした文字列。  
+下記のコマンドで生成できる。
+
+```
+travis encrypt DOCKEREMAIL=hoge@exampl.com --add env.global   
+travis encrypt DOCKER_USER=kaakaa_ --add env.global   
+travis encrypt DOCKER_PASS=password --add env.global   
+```
+
+[Using Docker in Builds - Travis CI](https://docs.travis-ci.com/user/docker/#Pushing-a-Docker-Image-to-a-Registry)  
+[Encryption keys - Travis CI](https://docs.travis-ci.com/user/encryption-keys/)  
+
+#### (3) Dockerビルド、DockerHubへのPushをする
+
+dockerコマンドを普通に打ってるだけ。  
+
+TravisではDocker Remote APIが起動してないのでgradleの`buildDockerImage`タスクが使えないのが悲しい。
+
+* * *
+
+build.gradle
+```gradle
+build.dependsOn installDist
+```
+
+Travis上で実行している`build`タスクが、Dockerビルドで必要なファイルを生成するための`installDist`タスクに依存するよう、どこかに上記１行を追加する。  
+悲しい。

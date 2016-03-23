@@ -1,13 +1,32 @@
+sudo: required
+services:
+- docker
 language: java
 jdk:
 - oraclejdk8
+env:
+  global:
+  - REPO=kaakaa/gradle-frontend-boilerplate
+  - COMMIT=${TRAVIS_COMMIT::8}
+  - TAG=${COMMIT}
+  - secure: KRbnv2JG7uesWTPPsaGWL0UuBd0zcYyTomUGukQca2PSKqKnIJ6GU8K1syPLw7aMQ8C4FBfDDHo1ubzB/f+7+rj0gHAQAUy9YdhkNXMul4XN29RSR0+s+a9LBeqmT3zYVdM3kf1s57yxJeTVEslG2ER88sGgBvz1JRB/CzjfqYtvva6fbb5bGNKaQWff7klU24vY/X7yxhNyzK+eAgokmplKYZYCIudKn2CypCZy8hwkRURGgzsswTR9bw4S2cV4kEV5KZuTv1hvdkEzL2sNh50rzJUxS8PSY9vA6xbeRU+pG+zBzBkc5BHP5VnPcjh5mr6uQ3/4fDZE5yFrRdZ7MeZ5wCjM4IqtJho+/phtqqnIef5VoDJjOXYZirnHChXydF0wq9dTYBAvovwhfx1WyXT5stJAZJum/aJHs+qr55FRrotRPvMKw0x3O/FsaPtYMmVX58cZvUiQOJlUCoJ0S49FOheARwdPyS6W6g+QZjMb1XY6uxnyxtGPwMyEaf0MBLmLtNtswRffaq3e1aKWw1a/GuCpMkNsKHMKo5Y5A1Ur2JjJy1tV+nKbueM6/Sr8kAgWLKzJ1B9dJTGk2Ebe9Aw7oAiOEiB2+0JfxuFFw/vRUYdSNzWoS6mOf7kYOLNqPiwghzKWCV0E1zOWRgfxJAXq0py3WXrS1ep5vxG/yz0=
+  - secure: uGQJ7mHoGHzevBQpldrZXaeeZr7K39ZzhDO+aUDV12O9RjqO9A9sscTqRtOXbYxrCBqurEBzqczhqE3GXceY6hxlbSxIcucekwmLBsL/gGp3YiANyxlrKhO2RPqXxOmy7HKpHMglpmsCZ0Znlxx14igZp5LbpQGH2IELfY/WoSxqbBFzcRXAYaJirgocdRnYCsR+D2w4FV7BbpsDpGqdL7naa1iN4m9Bp+NFw42mvZ3PVCKrXXq4yX7909aKgFZjGuet332Rbh9KpdhPMWyqFXsgvkbkskMgpxgSBqgMc3ETeH5yr0RxKQlwOKSuKEqtJcehjuz4J8FaSvxHdfKcB83PnjIKD1J1JhqyzhX4+tsBLgdHS6gIsNOLdlS6FNse/wM1QIRAv+MaH82ZhPV9T7DUyWLg4NVNYILo7gom4rGLplknya3PXY96IoyJ3GIvUdc1aAqBLAGYmPYADt0vp41SHN11oPdM3NqDv8H3l8VQWxYtdo+vYDu0dqavWWlICZUWIYi+1iS0jsIOXxURj4kQCj+QnrfaaRuhjHOVEcIjQub00zm+8S0KzowHE1P8PKWxtd2zBbkVSyDz7w38m4wih6WdbGltPfu3/JhUPmELKjubub6uEroxnjFgeHboa/Qu4tm36XIUHZ1uyYe4O+/BNrdyaDb2eHY8AMYgQI8=
+  - secure: NbXLz7JzMTXM3goqwjSjDz4A4CJIxuUrGMIMDWaEw89C2funzee+K6BTbGaCit4PbxbWU/k42a5b3r1s0G9IGJQagfQrI/XPx0LmRbnAWuhnYagrByKfOd3uG5bH4QxtDhKnIvQZ7bLlwl/uLQ2wbK+2PQdYz894gTQn2/D3elJkByVHuBvnaBHXUzh2J4CugR7hgvpgKwF2LQUxQ/qUrz4QyWp+YZx+P8RAxJkdVkGrr+xPYr2XMHko5zUCL4Asyf4FuNNTdvjc3tlz3Hm45J/e0T1U4oQF67GywyXGEQPsjvMZ3GwiSXp04epu0Cw+fBxc4eZnG5hMVbADxzpbutWPunTwZDRUTVAW8LN0qqyKpooJYF2x7eyBP8ngZ+blJwt5jzRbs/UESLa2KexDxD/vXgZuOQXt50j0v6PHPAYA74IsRDzTKBovH0oSR0hjn9Xx5Bbqvbcx1gsIKsAvMEYe6HdLp3vCtfN/Qg5xVAGiYtVVwR1HXHc7nYNPoilxFcBeteVzcmEb6qWyX4+R8w7ac/Xt+/O/quoYN3meeVrAhIDYGViyW5x3fGVC43R3qUCwqT64dKfEZpHu5nlv71x/HfRLjtfrlvipGCyQ0iEBkrU+JDQ7Z9eGDMgC4tV4QSkV48sbKGfTLydSk5JaxReVZbmVFS8CNQSCeSCwGHM=
+
+script: "./gradlew build"
 deploy:
   provider: releases
   api_key:
     secure: U57fz6+nKYBEyNHD+u1KU90CaEmMchBcbYUF3NF5xEjdD2JYqvD8F6UeEaxZRIPC28DJuGamVAOt12wHS9J2QW4F725S/ZFoceSq6B8Lnp+uPhpvXduAd/FvNG/xyg04H4jWA87fyRq8IH4SUfGPB0eygCmwpzQ1jWXsbfDT6Jcfi2HFHIva+YoXnzfC7jtF2aMYKN1k6OjiHtLhya02HBlzk/f+J7h576BQtp+qX9+rlG62ZK1bQ61v1Eb/thBahPpSLsS8n4I13WGDDZKdCHgFnH6feWyd0hOKvV23p5mCBu3I8BMryQzLvWQAL+6LbsNxRA9FlthH+yV4ZF88GnviRMex1S6hL2SQUuozXZisyYQcHASsdfw2jNQUfkYU3iU96HOy7Eqg9AshYx7hMq50wWyBfGNGedGIvAVwnXhwH6p0Uu7jDA8DehKih467iMcd+VGAjzEAfvLiVsiMmWhFSOjQ/OIo0X971gyztbyCHU6gJXv57oX4xNaX/mCDPQmCELj/E79jYqRIGrTxpCibYnLNXWTY9cliYD0bzDv9Bsmrf1QRtTRrfylQYyzQOoBBxusZ8EYjZpPOEapGkLBmaGEgpnojVjDiEkQH0AkNwdGzDeScxazEAmaVWy6dNKVb1J8thoFHmzAYhNGEclNMWpeKKXenDxScDb6/oaw=
   file:
-    - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.tar"
-    - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.zip"
+  - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.tar"
+  - "./build/distributions/gradle-frontend-boilerplate-1.0-SNAPSHOT.zip"
   on:
     repo: kaakaa/gradle-frontend-boilerplate
     tags: true
+
+after_deploy:
+- docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+- docker build -f Dockerfile -t $REPO:$COMMIT .
+- docker tag $REPO:$COMMIT $REPO:$TAG
+- docker push $REPO:$COMMIT

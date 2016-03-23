@@ -33,6 +33,8 @@ dependencies {
     compile 'com.sparkjava:spark-template-jade:2.3'
 }
 
+build.dependsOn installDist
+
 /** For frontend build */
 node {
     version = '4.4.0'
